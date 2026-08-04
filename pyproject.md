@@ -192,10 +192,10 @@ select = [
    5. Adicionar pelo menos uma dependência ao projeto (ex: `flask`, `django`, `fastapi`, `pyqt`, ou outra que você desejar).
    6. Configurar a versão do Python que seu projeto suporta (ex: `>=3.10`).
    7. Configurar dependencies de desenvolvimento (ex: `pytest`, `pytest-cov`, `ruff`, `pyright`, `pylint`, etc).
-   8. Verificar se todas as dependencias foram instaladas corretamente, rodando o comando `pdm install` no terminal.
-3. Execute o projeto usando o comando `pdm run python src/python_pdm_template/__main__.py` 
+   8. Verificar se todas as dependencias foram instaladas corretamente, rodando o comando `python -m pdm install` no terminal.
+3. Execute o projeto usando o comando `python -m pdm run python src/python_pdm_template/__main__.py` 
    - Verifique se o programa rodou corretamente. Se tiver dúvidas, pergunte para mim. Pode usar IA também para auxiliar nesse processo.
-4. Verifique se os testes automatizados estão rodando corretamente usando o comando `pdm run pytest`. 
+4. Verifique se os testes automatizados estão rodando corretamente usando o comando `python -m pdm run pytest`. 
    - Verifique se os testes de cobertura estão sendo gerados corretamente. 
    - Se tiver dúvidas, pergunte para mim. Pode usar IA também para auxiliar nesse processo.
 5. Teste o `pyright` e o `ruff` fazendo algum erro de código no arquivo `src/python_pdm_template/utils.py` 
@@ -206,7 +206,7 @@ select = [
      - acessar um atributo privado de outra classe
    - Verifique se o `pyright` e o `ruff` identificaram os erros corretamente. 
    - Se tiver dúvidas, pergunte para mim. Pode usar IA também para auxiliar nesse processo.
-6. Compile o projeto usando o comando `pdm build` 
+6. Compile o projeto usando o comando `python -m pdm build` 
    - Verifique se os arquivos `.WHL` foram gerados corretamente na pasta `dist/`. 
    - Se tiver dúvidas, pergunte para mim. Pode usar IA também para auxiliar nesse processo.
 7. Instale o arquivo `.WHL` gerado usando o comando `python -m pip install dist/seu_arquivo.whl`    

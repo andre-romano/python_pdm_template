@@ -216,3 +216,20 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Windows
+desktop.ini
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+$RECYCLE.BIN/
+
+# Binarios grandes da apresentacao AV3 (PDFs e .rar nao versionados)
+*.pdf
+*.rar
+*.zip
+docs/av3.rar
+"Log Sentinel - AV3 *"
+
+# Excecao: o slide oficial da AV3 (versao corrigida do Aryan) e versionado
+!docs/av3/SLIDES.pdf

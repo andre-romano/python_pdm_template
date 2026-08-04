@@ -29,10 +29,10 @@ jobs:
         run: python -m pip install pdm
 
       - name: Instalar dependências
-        run: pdm install
+        run: python -m pdm install
 
       - name: Rodar testes
-        run: pdm run pytest
+        run: python -m pdm run pytest
 ```
 
 ## Dicas
@@ -56,7 +56,7 @@ Consulte a [documentação oficial](https://docs.github.com/pt/actions) para exe
   ```yaml
   # no arquivo ".github/workflows/ci.yml", adicione:
         - name: Rodar ruff
-          run: pdm run ruff check src/
+          run: python -m pdm run ruff check src/
   ```
 3. O workflow `ci.yaml` deve rodar quando houver um ``git push`` no repositório ou quando você for na aba ``Actions -> Integracao Continua`` e clicar no botao ``Executar``. 
    - Se quiser, voce pode configurar o workflow para rodar com outros eventos, alem do ``push`` (ex: tags, releases, etc). 

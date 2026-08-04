@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log Sentinel — Guia de Estudo AV2</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-card: #1a2028;
+    --bg-elev: #232b36;
+    --border: #2d3640;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --success: #3fb950;
+    --error: #f85149;
+    --warn: #d29922;
+    --helena: #b392f0;
+    --rodrigo: #7ee787;
+    --aryan: #ff7b72;
+    --elder: #58a6ff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 0;
+  }
+  header {
+    background: linear-gradient(135deg, #1a2028 0%, #2d3640 100%);
+    padding: 60px 24px 80px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  header h1 {
+    font-size: 2.8rem;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, #58a6ff, #b392f0);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  header p { color: var(--text-dim); font-size: 1.1rem; }
+  header .badge {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 4px 12px;
+    background: var(--bg-elev);
+    border-radius: 12px;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+  nav {
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    z-index: 100;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  nav a {
+    display: inline-block;
+    color: var(--text-dim);
+    text-decoration: none;
+    margin-right: 24px;
+    font-size: 0.95rem;
+    transition: color 0.2s;
+  }
+  nav a:hover { color: var(--accent); }
+  main { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+  section { margin-bottom: 64px; }
+  section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+    border-left: 4px solid var(--accent);
+    padding-left: 16px;
+  }
+  section .subtitle {
+    color: var(--text-dim);
+    margin-bottom: 32px;
+    padding-left: 20px;
+  }
+
+  /* Glossário */
+  .glossary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .term {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .term:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .term h3 {
+    color: var(--accent);
+    font-size: 1rem;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .term h3::after {
+    content: "+";
+    font-size: 1.4rem;
+    color: var(--text-dim);
+    transition: transform 0.2s;
+  }
+  .term.open h3::after { transform: rotate(45deg); }
+  .term .definition {
+    color: var(--text-dim);
+    font-size: 0.92rem;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, margin-top 0.2s;
+  }
+  .term.open .definition { max-height: 400px; margin-top: 12px; }
+
+  /* FAQ */
+  .faq-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .faq-question {
+    padding: 16px 20px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .faq-question::after {
+    content: "▾";
+    color: var(--text-dim);
+    transition: transform 0.2s;
+  }
+  .faq-item.open .faq-question::after { transform: rotate(180deg); }
+  .faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 20px;
+    color: var(--text-dim);
+    transition: max-height 0.3s ease, padding 0.2s;
+  }
+  .faq-item.open .faq-answer { max-height: 400px; padding: 0 20px 16px; }
+
+  /* Tabs - Cola */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .tab {
+    padding: 10px 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .tab[data-tab="helena"].active { border-color: var(--helena); color: var(--helena); }
+  .tab[data-tab="rodrigo"].active { border-color: var(--rodrigo); color: var(--rodrigo); }
+  .tab[data-tab="aryan"].active { border-color: var(--aryan); color: var(--aryan); }
+  .tab[data-tab="elder"].active { border-color: var(--elder); color: var(--elder); }
+  .tab-content {
+    display: none;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+  }
+  .tab-content.active { display: block; }
+  .tab-content h3 { color: var(--accent); margin-bottom: 16px; }
+  .tab-content h4 {
+    color: var(--text);
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+  }
+  .tab-content ul { padding-left: 20px; margin-bottom: 8px; }
+  .tab-content li { margin-bottom: 6px; }
+  .fallback {
+    background: var(--bg-elev);
+    border-left: 3px solid var(--warn);
+    padding: 12px 16px;
+    margin-top: 12px;
+    font-style: italic;
+    border-radius: 4px;
+  }
+
+  /* Quiz */
+  .quiz-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+  }
+  .quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .quiz-score {
+    background: var(--bg-elev);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+  .question { margin-bottom: 32px; }
+  .question p { margin-bottom: 12px; font-weight: 600; }
+  .option {
+    display: block;
+    padding: 12px 16px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .option:hover:not(.answered) { border-color: var(--accent); }
+  .option.selected { border-color: var(--accent); background: rgba(88, 166, 255, 0.1); }
+  .option.correct { border-color: var(--success); background: rgba(63, 185, 80, 0.15); }
+  .option.incorrect { border-color: var(--error); background: rgba(248, 81, 73, 0.15); }
+  .feedback {
+    margin-top: 12px;
+    padding: 12px 16px;
+    border-radius: 6px;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.correct { background: rgba(63, 185, 80, 0.1); color: var(--success); }
+  .feedback.incorrect { background: rgba(248, 81, 73, 0.1); color: var(--error); }
+  .quiz-result {
+    text-align: center;
+    padding: 32px;
+    margin-top: 24px;
+    background: var(--bg-elev);
+    border-radius: 12px;
+    display: none;
+  }
+  .quiz-result.show { display: block; }
+  .quiz-result h3 { font-size: 2rem; margin-bottom: 12px; }
+  .quiz-result button {
+    margin-top: 16px;
+    padding: 10px 24px;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* Resumo */
+  .summary-box {
+    background: linear-gradient(135deg, rgba(88, 166, 255, 0.1), rgba(179, 146, 240, 0.1));
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 28px 32px;
+    font-size: 1.05rem;
+    line-height: 1.8;
+  }
+  .summary-box::before {
+    content: "Resumo de 30 segundos — decora isto";
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent);
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+
+  /* Dicas */
+  .tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .tip {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .tip h4 { color: var(--accent); margin-bottom: 12px; font-size: 0.95rem; }
+  .tip ul { padding-left: 18px; }
+  .tip li { margin-bottom: 6px; color: var(--text-dim); font-size: 0.9rem; }
+
+  footer {
+    text-align: center;
+    padding: 40px 24px;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 2rem; }
+    section h2 { font-size: 1.4rem; }
+    main { padding: 24px 16px; }
+    .quiz-container { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Log Sentinel</h1>
+  <p>Guia de Estudo — Apresentação AV2</p>
+  <p style="margin-top: 8px; font-size: 0.95rem;">Engenharia de Software II · IFBA 2026.1</p>
+  <span class="badge">Apresentação: 13/05/2026</span>
+</header>
+
+<nav>
+  <a href="#sobre">Sobre</a>
+  <a href="#glossario">Glossário</a>
+  <a href="#faq">FAQ</a>
+  <a href="#cola">Cola por integrante</a>
+  <a href="#quiz">Quiz</a>
+  <a href="#resumo">Resumo</a>
+</nav>
+
+<main>
+
+<section id="sobre">
+  <h2>Sobre o projeto</h2>
+  <p class="subtitle">O que é o Log Sentinel em 1 minuto</p>
+  <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px;">
+    <p style="margin-bottom: 16px;"><strong>Problema:</strong> Servidores Apache geram arquivos de log de vários GB por dia. Quando ocorre um incidente de segurança, o administrador precisa investigar esses logs manualmente — lento e propenso a erro.</p>
+    <p style="margin-bottom: 16px;"><strong>Solução:</strong> Log Sentinel é uma ferramenta de análise <em>post-mortem</em> de logs Apache com foco em segurança. Detecta força bruta, scanners de vulnerabilidade e picos de tráfego. Oferece CLI (terminal) e GUI (janela gráfica) que compartilham o mesmo Core.</p>
+    <p><strong>Equipe:</strong> Helena (GUI) · Aryan (Core) · Rodrigo (CLI) · Elder (CI/CD)</p>
+  </div>
+</section>
+
+<section id="glossario">
+  <h2>Glossário</h2>
+  <p class="subtitle">Clique em cada termo pra expandir. Leia os que você não conhece — entender é mais importante que memorizar.</p>
+  <div class="glossary-grid" id="glossary-grid"></div>
+</section>
+
+<section id="faq">
+  <h2>FAQ — Perguntas que o professor pode fazer</h2>
+  <p class="subtitle">Clique pra ver a resposta. Entenda o raciocínio por trás de cada uma.</p>
+  <div id="faq-list"></div>
+</section>
+
+<section id="cola">
+  <h2>Pontos por integrante</h2>
+  <p class="subtitle">Cada um lê a sua aba pra ter clareza do que vai falar. Foco em entender, não decorar.</p>
+  <div class="tabs">
+    <button class="tab active" data-tab="helena">🟪 Helena</button>
+    <button class="tab" data-tab="rodrigo">🟩 Rodrigo</button>
+    <button class="tab" data-tab="aryan">🟥 Aryan</button>
+    <button class="tab" data-tab="elder">🟦 Elder</button>
+  </div>
+
+  <div class="tab-content active" data-content="helena">
+    <h3>Helena — GUI (abre a apresentação)</h3>
+    <h4>Termos que você precisa entender e saber explicar</h4>
+    <ul>
+      <li>GUI (interface gráfica)</li>
+      <li>Post-mortem (análise depois do fato)</li>
+      <li>MVP (versão mínima viável)</li>
+      <li>Definition of Done (critérios pra feature estar pronta)</li>
+      <li>Hash MD5 (impressão digital do arquivo, prova que não foi alterado)</li>
+    </ul>
+    <h4>3 ideias centrais que você defende</h4>
+    <ul>
+      <li>Log Sentinel = ferramenta de análise post-mortem de logs Apache, com foco em segurança</li>
+      <li>Escopo recortado com critério (1 formato bem feito &gt; 4 mal feitos)</li>
+      <li>Definition of Done garante que nada vira release sem qualidade</li>
+    </ul>
+  </div>
+
+  <div class="tab-content" data-content="rodrigo">
+    <h3>Rodrigo — CLI (apresenta requisitos)</h3>
+    <h4>Termos que você precisa entender e saber explicar</h4>
+    <ul>
+      <li>Requisito Funcional (o QUE o sistema faz)</li>
+      <li>Requisito Não-Funcional (COMO o sistema faz — performance, memória, etc.)</li>
+      <li>Regra de Negócio (lei do domínio do problema)</li>
+      <li>CLI (terminal/console)</li>
+      <li>Subcomando (analyze, batch, detect)</li>
+      <li>Flag (--status-code, --output)</li>
+      <li>SOLID (5 princípios de design)</li>
+    </ul>
+    <h4>3 ideias centrais que você defende</h4>
+    <ul>
+      <li>RFs definem o QUE o sistema faz (parsing, interfaces, batch, feedback)</li>
+      <li>RNFs definem COMO ele faz (memória ≤ 200MB, responsivo, portátil)</li>
+      <li>RNs são inegociáveis: somente leitura, fail-fast, paridade CLI=GUI</li>
+    </ul>
+  </div>
+
+  <div class="tab-content" data-content="aryan">
+    <h3>Aryan — Core (apresenta arquitetura, TDD e testes)</h3>
+    <h4>Termos que você precisa entender e saber explicar</h4>
+    <ul>
+      <li>Arquitetura em camadas</li>
+      <li>5 padrões: MVC, Pipe &amp; Filter, Strategy, DAO, Factory</li>
+      <li>SOLID (5 princípios)</li>
+      <li>TDD (Red-Green-Refactor)</li>
+      <li>Pirâmide de testes (70% unit / 25% integração / 5% E2E)</li>
+      <li>AAA (Arrange-Act-Assert)</li>
+      <li>MagicMock (objeto falso pra testes)</li>
+      <li>Edge case (caso extremo)</li>
+    </ul>
+    <h4>3 ideias centrais que você defende</h4>
+    <ul>
+      <li>Core é isolado das interfaces, usa 5 padrões de projeto clássicos</li>
+      <li>TDD garante cobertura natural ≥ 80% e código testável</li>
+      <li>Testamos tanto caminho feliz quanto edge cases (defeitos)</li>
+    </ul>
+  </div>
+
+  <div class="tab-content" data-content="elder">
+    <h3>Elder — CI/CD (cronograma, pipeline, métricas e fecha)</h3>
+    <h4>Termos que você precisa entender e saber explicar</h4>
+    <ul>
+      <li>CI/CD (integração e entrega contínua)</li>
+      <li>Pipeline (sequência de etapas automáticas)</li>
+      <li>Quality Gate (critério que faz pipeline falhar)</li>
+      <li>PyInstaller (cria executável a partir do Python)</li>
+      <li>PDM (gerenciador de dependências)</li>
+      <li>Gantt (gráfico de cronograma)</li>
+      <li>Milestone (marco do projeto)</li>
+      <li>Fork (cópia de repo com vínculo)</li>
+    </ul>
+    <h4>3 ideias centrais que você defende</h4>
+    <ul>
+      <li>Pipeline com 5 quality gates: lint, types, testes, cobertura ≥ 80%, SonarCloud</li>
+      <li>Release engineering: PyInstaller pra Linux e Windows, automatizado via tag git</li>
+      <li>Cronograma com 5 milestones, AV1 e AV2 já concluídos</li>
+    </ul>
+  </div>
+</section>
+
+<section id="quiz">
+  <h2>Quiz interativo</h2>
+  <p class="subtitle">10 perguntas. Meta: 7 ou mais acertos. Clica nas opções pra responder.</p>
+  <div class="quiz-container">
+    <div class="quiz-header">
+      <span>Sua pontuação:</span>
+      <span class="quiz-score" id="quiz-score">0 / 10</span>
+    </div>
+    <div id="quiz-questions"></div>
+    <div class="quiz-result" id="quiz-result">
+      <h3 id="quiz-result-title">—</h3>
+      <p id="quiz-result-msg">—</p>
+      <button onclick="resetQuiz()">Refazer quiz</button>
+    </div>
+  </div>
+</section>
+
+<section id="resumo">
+  <h2>Resumo do projeto</h2>
+  <p class="subtitle">Os pontos-chave do que estamos construindo. Se entender isto, entende o projeto.</p>
+  <div class="summary-box">
+    O <strong>Log Sentinel</strong> é uma ferramenta de análise <em>post-mortem</em> de logs Apache, com foco em segurança. Detecta <strong>força bruta</strong>, <strong>scanners de vulnerabilidade</strong> e <strong>picos de tráfego</strong>. Oferece duas interfaces — <strong>CLI</strong> e <strong>GUI</strong> — que compartilham o mesmo <strong>Core</strong>, construído com <strong>5 padrões de projeto</strong> (MVC, Pipe &amp; Filter, Strategy, DAO, Factory). Desenvolvido com <strong>TDD</strong> (testes antes do código), cobertura mínima de <strong>80%</strong>, e pipeline <strong>CI/CD</strong> com 5 quality gates automáticos. Cronograma dividido em 5 milestones até agosto/2026.
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p>Log Sentinel · Engenharia de Software II · IFBA 2026.1</p>
+  <p style="margin-top: 8px;"><a href="https://github.com/202316360036/log-sentinel" target="_blank">Repositório no GitHub</a></p>
+</footer>
+
+<script>
+const GLOSSARY = [
+  { term: "Log", def: "Arquivo de texto onde o servidor escreve uma linha pra cada requisição recebida. Cada linha tem IP, data, comando, página, código de resposta etc." },
+  { term: "Apache", def: "Software de servidor web (junto com Nginx, IIS). Nosso projeto lê os logs do formato Apache." },
+  { term: "Post-mortem", def: "Análise feita DEPOIS que algo aconteceu. Nosso sistema lê arquivos que já existem, não monitora em tempo real." },
+  { term: "CLI", def: "Command Line Interface. Interface de linha de comando — o usuário digita comandos no terminal, sem janela." },
+  { term: "GUI", def: "Graphical User Interface. Interface gráfica com janelas, botões, tabelas e menus." },
+  { term: "Core", def: "O motor do sistema. Onde fica toda lógica de negócio (ler arquivo, detectar ataques, calcular métricas). Não tem nada de tela." },
+  { term: "Força bruta", def: "Tipo de ataque em que o invasor tenta milhares de senhas em sequência. Nos logs aparece como o MESMO IP fazendo muitas requisições em pouco tempo." },
+  { term: "Scanner de vulnerabilidade", def: "Outro tipo de ataque: o invasor tenta acessar páginas conhecidas de admin como /admin, /wp-login, /.env." },
+  { term: "Parser", def: "Programa que LÊ um texto bruto e EXTRAI informação estruturada dele. Nosso parser pega uma linha de log e devolve um objeto com {ip, data, status...}." },
+  { term: "Regex", def: "Expressão regular. Mini-linguagem pra descrever padrões em texto. O parser usa regex pra identificar onde começa o IP, onde termina a data etc." },
+  { term: "TDD", def: "Test-Driven Development. Metodologia: escreve o TESTE PRIMEIRO, depois o código. Ciclo: RED (teste falha) → GREEN (código passa) → REFACTOR." },
+  { term: "Mock", def: "Objeto falso usado em testes. Em vez de testar com arquivo real, você cria um Mock que finge ser o arquivo. Teste fica rápido e isolado." },
+  { term: "Edge case", def: "Caso extremo ou fora do comum. Ex: arquivo vazio, gigante, binário, linha mal-formada. Testes de defeitos cobrem edge cases." },
+  { term: "CI/CD", def: "Continuous Integration / Continuous Delivery. Pipeline automatizado que roda em todo commit: lint, type check, testes, cobertura." },
+  { term: "Cobertura de teste", def: "Porcentagem do código que está sendo testada. Meta mínima do projeto: 80%." },
+  { term: "Strategy", def: "Padrão de projeto que permite trocar implementação sem mexer em quem chama. Ex: ApacheLogParser hoje, NginxLogParser amanhã." },
+  { term: "DAO", def: "Data Access Object. Classe que isola o acesso a dados (arquivo, banco, rede). Facilita troca e teste com Mock." },
+  { term: "Factory", def: "Padrão que centraliza a criação de objetos. Uma fábrica decide qual implementação criar." },
+  { term: "Definition of Done", def: "Lista de critérios que uma feature precisa cumprir pra ser considerada pronta. Sem isso, não tem merge na main." },
+  { term: "Fork", def: "Cópia de um repositório no GitHub que mantém vínculo com o original. Nosso repo é fork do python_pdm_template." },
+  { term: "Pull Request", def: "Pedido formal de juntar mudanças de uma branch na principal. Permite review de código por outras pessoas antes do merge." },
+];
+
+const FAQ = [
+  { q: "Por que escolheram Apache e não Nginx?", a: "Foco em uma plataforma garante qualidade. A arquitetura usa Strategy, então adicionar Nginx no futuro é criar uma nova classe sem alterar o resto." },
+  { q: "Por que TDD e não escrever teste depois?", a: "Três motivos: (1) garante código testável por design, (2) cobertura natural acima de 80%, (3) documentação executável do comportamento esperado." },
+  { q: "O que é um Mock e quando usar?", a: "Objeto que SIMULA outro componente. Usar quando o real tem I/O (arquivo, rede, banco) ou é lento. Ex: testar LogAnalyzer sem precisar de arquivo real — usa MagicMock no DAO." },
+  { q: "Por que CLI E GUI? Não bastava uma só?", a: "Cada uma serve um perfil. CLI pra automação (cron, scripts, CI). GUI pra investigação visual interativa. Ambas usam o MESMO Core — paridade total (RN-03)." },
+  { q: "Como garantem que o sistema não corrompe os logs?", a: "Três camadas: (1) sempre abrir com modo 'r', (2) DAO rejeita modos de escrita, (3) teste automatizado compara hash MD5 do arquivo antes e depois — se diferir, falha. Isso é a RN-01." },
+  { q: "Como processam arquivos de 5GB sem estourar a RAM?", a: "Usando GENERATORS do Python. Leitura é linha por linha (yield), nunca .read() ou .readlines() do arquivo inteiro. Limite de RAM é 200MB independente do tamanho do arquivo (RNF-03)." },
+  { q: "Por que 80% de cobertura e não 100%?", a: "100% é armadilha. Você acaba testando getters, setters, código trivial. Ou pior: escreve testes só pra subir o número. 80% é meta de indústria — cobre o que importa sem virar teatro." },
+  { q: "O que é Strategy e onde usaram?", a: "Padrão que permite trocar implementação por contrato (interface). Usamos pra parsers de log: LogParserStrategy é a interface, ApacheLogParser é uma implementação. Adicionar Nginx amanhã = nova classe NginxLogParser, sem mexer no resto." },
+  { q: "Como funciona o CI/CD de vocês?", a: "Dois workflows: (1) ci.yaml roda em cada push — ruff (lint), pyright (tipos), pytest (testes), SonarCloud (qualidade); (2) release.yaml roda em tag git — PyInstaller monta executável Linux e Windows, anexa na GitHub Release." },
+  { q: "O que acontece se o pipeline falha?", a: "O commit fica marcado vermelho no GitHub. Quem abriu o PR precisa corrigir antes do merge. Code review por colega é norma da equipe." },
+  { q: "Por que usar PDM e não pip?", a: "PDM gerencia ambiente virtual + dependências + lock file + scripts numa única ferramenta. Pip precisa de virtualenv + requirements.txt separados, sem reprodutibilidade garantida." },
+  { q: "Como dividiram o trabalho?", a: "Cada um tem uma área: Aryan (Core — motor), Elder (CI/CD — pipeline e build), Rodrigo (CLI — terminal), Helena (GUI — janela gráfica). Core não depende de CLI/GUI, então dá pra trabalhar em paralelo." },
+  { q: "Quando entregam o produto final?", a: "12/08/2026 (AV5). Antes: AV3 em 17/06 sobre falhas de software, AV4 é o seminário. Cronograma completo no Gantt." },
+  { q: "Por que escolheram Python e não outra linguagem?", a: "Ecossistema maduro pra processamento de texto (regex), tipagem opcional com pyright, frameworks bons pra CLI (Typer) e GUI (PySide6), e PyInstaller pra distribuição standalone." },
+];
+
+const QUIZ = [
+  { q: "O que é análise post-mortem?",
+    options: ["Análise em tempo real, enquanto o sistema roda", "Análise de arquivos que já existem (depois do fato)", "Análise feita por inteligência artificial", "Análise visual em gráficos"],
+    correct: 1, expl: "Post-mortem = depois do fato. Lemos arquivos que já existem." },
+  { q: "Qual é a diferença entre CLI e GUI?",
+    options: ["CLI é mais rápida, GUI é mais lenta", "CLI usa terminal, GUI usa janela gráfica", "CLI é em inglês, GUI é em português", "CLI tem mais funções, GUI tem menos"],
+    correct: 1, expl: "CLI = terminal (texto). GUI = janela com botões e tabelas." },
+  { q: "O que é TDD?",
+    options: ["Testar o código depois de pronto", "Test-Driven Development — escrever teste ANTES do código", "Tipo de Documentação Detalhada", "Teste Distribuído em servidores"],
+    correct: 1, expl: "TDD = teste primeiro, código depois. Ciclo RED → GREEN → REFACTOR." },
+  { q: "Pra que serve um Mock em testes?",
+    options: ["Tornar o teste mais lento e completo", "Simular componentes externos (arquivo, banco, rede) pra isolar a unidade testada", "Substituir o código real em produção", "Ferramenta de desenho de telas"],
+    correct: 1, expl: "Mock = objeto falso que simula dependências externas. Isola a unidade testada." },
+  { q: "Qual é a cobertura mínima de testes do projeto?",
+    options: ["50%", "70%", "80%", "100%"],
+    correct: 2, expl: "Meta de 80%. 100% é armadilha — vira teatro." },
+  { q: "O que detectamos como 'força bruta' nos logs?",
+    options: ["Servidor com pouco hardware", "Mesmo IP fazendo muitas requisições em pouco tempo", "Linhas mal-formadas no arquivo", "Arquivos maiores que 1GB"],
+    correct: 1, expl: "Força bruta = mesmo IP > N requisições em janela de tempo." },
+  { q: "O que é o padrão Strategy?",
+    options: ["Plano de marketing do projeto", "Padrão que permite trocar implementação por contrato (interface), sem alterar quem chama", "Estratégia de teste de software", "Ferramenta de versionamento"],
+    correct: 1, expl: "Strategy = interface única, várias implementações intercambiáveis." },
+  { q: "Por que CLI e GUI compartilham o mesmo Core?",
+    options: ["Pra economizar espaço em disco", "Pra garantir paridade de funcionalidades e evitar duplicação de lógica", "Porque o Python obriga", "Pra rodar mais rápido"],
+    correct: 1, expl: "RN-03: paridade total entre CLI e GUI. Mesmo Core = sem duplicação." },
+  { q: "O que é um quality gate no CI/CD?",
+    options: ["Porta de entrada no escritório", "Critério automático que faz o pipeline falhar se não for atendido (ex: cobertura < 80%)", "Sala onde os devs se reúnem", "Servidor especial pra testes"],
+    correct: 1, expl: "Quality gate = barreira de qualidade no pipeline. Falhou = não passa." },
+  { q: "Por que o sistema abre arquivos só com modo 'r'?",
+    options: ["Pra não alterar, sobrescrever ou apagar o log original — regra de negócio RN-01", "Porque 'r' significa 'rápido'", "Pra economizar memória", "Porque o Python só aceita esse modo"],
+    correct: 0, expl: "RN-01: somente leitura. Hash MD5 antes/depois prova que arquivo não mudou." },
+];
+
+let answeredQuestions = new Set();
+let score = 0;
+
+function renderGlossary() {
+  const grid = document.getElementById("glossary-grid");
+  GLOSSARY.forEach((item, i) => {
+    const div = document.createElement("div");
+    div.className = "term";
+    div.innerHTML = `<h3>${item.term}</h3><div class="definition">${item.def}</div>`;
+    div.addEventListener("click", () => div.classList.toggle("open"));
+    grid.appendChild(div);
+  });
+}
+
+function renderFAQ() {
+  const list = document.getElementById("faq-list");
+  FAQ.forEach((item, i) => {
+    const div = document.createElement("div");
+    div.className = "faq-item";
+    div.innerHTML = `<div class="faq-question">${item.q}</div><div class="faq-answer">${item.a}</div>`;
+    div.querySelector(".faq-question").addEventListener("click", () => div.classList.toggle("open"));
+    list.appendChild(div);
+  });
+}
+
+function renderQuiz() {
+  const cont = document.getElementById("quiz-questions");
+  cont.innerHTML = "";
+  QUIZ.forEach((q, qi) => {
+    const div = document.createElement("div");
+    div.className = "question";
+    let html = `<p>${qi+1}. ${q.q}</p>`;
+    q.options.forEach((opt, oi) => {
+      html += `<div class="option" data-q="${qi}" data-o="${oi}">${opt}</div>`;
+    });
+    html += `<div class="feedback" id="fb-${qi}"></div>`;
+    div.innerHTML = html;
+    cont.appendChild(div);
+  });
+  document.querySelectorAll(".option").forEach(opt => {
+    opt.addEventListener("click", handleAnswer);
+  });
+}
+
+function handleAnswer(e) {
+  const qi = parseInt(e.target.dataset.q);
+  const oi = parseInt(e.target.dataset.o);
+  if (answeredQuestions.has(qi)) return;
+  answeredQuestions.add(qi);
+
+  const correct = QUIZ[qi].correct;
+  const options = document.querySelectorAll(`.option[data-q="${qi}"]`);
+  options.forEach((opt, i) => {
+    opt.classList.add("answered");
+    if (i === correct) opt.classList.add("correct");
+    if (i === oi && i !== correct) opt.classList.add("incorrect");
+  });
+
+  const fb = document.getElementById(`fb-${qi}`);
+  if (oi === correct) {
+    fb.className = "feedback correct show";
+    fb.textContent = "✓ Correto! " + QUIZ[qi].expl;
+    score++;
+  } else {
+    fb.className = "feedback incorrect show";
+    fb.textContent = "✗ " + QUIZ[qi].expl;
+  }
+  document.getElementById("quiz-score").textContent = `${score} / 10`;
+
+  if (answeredQuestions.size === QUIZ.length) showResult();
+}
+
+function showResult() {
+  const result = document.getElementById("quiz-result");
+  const title = document.getElementById("quiz-result-title");
+  const msg = document.getElementById("quiz-result-msg");
+  result.classList.add("show");
+  title.textContent = `${score} de 10`;
+  if (score === 10) msg.textContent = "Dominou! Pronto pra apresentar.";
+  else if (score >= 7) msg.textContent = "Bom. Dá uma releitura no Glossário e FAQ.";
+  else if (score >= 4) msg.textContent = "Precisa estudar mais. Leia tudo de novo.";
+  else msg.textContent = "Respira, lê com calma e refaz o quiz.";
+}
+
+function resetQuiz() {
+  answeredQuestions.clear();
+  score = 0;
+  document.getElementById("quiz-score").textContent = "0 / 10";
+  document.getElementById("quiz-result").classList.remove("show");
+  renderQuiz();
+  document.getElementById("quiz").scrollIntoView({ behavior: "smooth" });
+}
+
+document.querySelectorAll(".tab").forEach(t => {
+  t.addEventListener("click", () => {
+    const tabName = t.dataset.tab;
+    document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach(x => x.classList.remove("active"));
+    t.classList.add("active");
+    document.querySelector(`.tab-content[data-content="${tabName}"]`).classList.add("active");
+  });
+});
+
+renderGlossary();
+renderFAQ();
+renderQuiz();
+</script>
+
+</body>
+</html>

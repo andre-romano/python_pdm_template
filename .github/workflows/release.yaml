@@ -1,0 +1,70 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build executável (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ['3.12']
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Instalar PDM
+        run: python -m pip install --upgrade pip pdm
+
+      - name: Instalar dependências
+        run: pdm install --no-self
+
+      - name: Instalar PyInstaller
+        run: pdm add -d pyinstaller
+
+      - name: Build executável (Linux)
+        if: runner.os == 'Linux'
+        run: pdm run pyinstaller --onefile --name log-sentinel src/python_pdm_template/__main__.py
+
+      - name: Build executável (Windows)
+        if: runner.os == 'Windows'
+        run: pdm run pyinstaller --onefile --name log-sentinel.exe src/python_pdm_template/__main__.py
+
+      - name: Upload artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: log-sentinel-${{ matrix.os }}
+          path: dist/log-sentinel*
+          retention-days: 30
+
+  release:
+    name: Publicar Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+
+    steps:
+      - name: Baixar artefatos
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Criar GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*
+          generate_release_notes: true
