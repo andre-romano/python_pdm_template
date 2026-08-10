@@ -1,69 +1,74 @@
-# python_pdm_template
+# Log Sentinel
 
-Este repositório é um template para projetos Python utilizando o [PDM](https://pdm.fming.dev/), uma ferramenta moderna de gerenciamento de pacotes e ambientes.
+[![CI](https://github.com/202316360036/log-sentinel/actions/workflows/ci.yaml/badge.svg)](https://github.com/202316360036/log-sentinel/actions/workflows/ci.yaml)
+[![Tests](https://github.com/202316360036/log-sentinel/actions/workflows/test.yaml/badge.svg)](https://github.com/202316360036/log-sentinel/actions/workflows/test.yaml)
+[![Python 3.14+](https://img.shields.io/badge/python-3.14+-blue.svg)](https://www.python.org/downloads/)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=AryanAssis_ENGS2&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=AryanAssis_ENGS2)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=AryanAssis_ENGS2&metric=coverage)](https://sonarcloud.io/summary/new_code?id=AryanAssis_ENGS2)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
-## Como usar este template
+Suite de auditoria e analise post-mortem de logs Apache. Detecta padroes de ataque (forca bruta, scanner de vulnerabilidades, picos de trafego) e gera relatorios consolidados via CLI e GUI.
 
-1. **Copiar o template**:
-   - No GitHub, clique no botão ``Use this template`` (ou ``Usar este template``) na página do repositório.
-   - Siga as instruções para criar um novo repositório baseado neste template.
+Projeto desenvolvido na disciplina **Engenharia de Software II** — IFBA 2026.1.
 
-2. **Clonar o repositório**:
-   - Clone o novo repositório para sua máquina local:
-     ```bash
-     git clone https://github.com/seu-usuario/seu-repositorio.git
-     cd seu-repositorio
-     ```
+## Requisitos
 
-## Configuração do ambiente
+- Python 3.14 ou superior
+- [PDM](https://pdm-project.org/) para gerenciamento de dependencias
 
-1. **Instalar o PDM**:
-   - Certifique-se de que o PDM está instalado. Caso não esteja, instale-o com os seguintes comandos:
-     ```bash
-     python -m pip install pipx
-     python -m pipx install pdm
-     python -m pipx ensurepath
-     pdm --version
-     ```
+## Instalacao
 
-2. **Instalar dependências**:
-   - Execute o comando abaixo para instalar as dependências do projeto:
-     ```bash
-     pdm install
-     ```
+Clonar o repositorio e instalar as dependencias:
 
-3. **Feche e reabra o Visual Studio Code** para garantir que o ambiente virtual (pasta `.venv`, criada pelo PDM) seja reconhecido corretamente.
+```bash
+git clone https://github.com/202316360036/log-sentinel.git
+cd log-sentinel
+python -m pip install pdm
+pdm install
+```
 
-4. **Adicionar novas dependências**:
-   - Para adicionar uma nova dependência ao projeto, use o comando:
-     ```bash
-     pdm add nome-da-dependencia
-     ```
-   - Para adicionar dependências de desenvolvimento (instaladas apenas no ambiente de desenvolvimento - nunca em produção), utilize:
-     ```bash
-     pdm add -d nome-da-dependencia
-     ```
+## Uso
 
-## Executar o projeto
+### CLI
 
-1. **Rodar o projeto**:
-   - Após instalar as dependências, você pode executar o projeto diretamente usando:
-     ```bash
-     pdm run python src/python_pdm_template/__main__.py
-     ```
+Analisar um arquivo de log Apache:
 
-O PDM nao apenas controla dependencias e executa o projeto, ele também pode compilar o projeto Python em arquivos `.WHL` e publicá-los no repositório oficial de pacotes do Python ([PyPi](https://pypi.org/)).
+```bash
+pdm run python -m python_pdm_template analyze caminho/para/arquivo.log
+```
 
-Para mais informações sobre as essas e outras funcionalidades disponíveis no PDM, consulte a [documentação oficial](https://pdm.fming.dev/).
+O relatorio inclui numero de linhas processadas, linhas descartadas por erro de parse, hash SHA-256 do arquivo lido e a lista de deteccoes agrupadas por tipo.
+
+### GUI
+
+Abrir a interface grafica:
+
+```bash
+pdm run gui
+```
+
+A janela suporta selecao de arquivo por botao ou por arrastar e soltar, com filtros por IP e por status na tabela.
+
+## Testes
+
+```bash
+pdm run pytest
+```
+
+O comando ja gera `coverage.xml` na raiz (consumido pelo SonarCloud) e o relatorio HTML em `htmlcov/`.
+
+## Documentacao da disciplina
+
+- [`docs/av2/`](docs/av2) — Testes de Software.
+- [`docs/av3/`](docs/av3) — Falhas de Software.
+- [`docs/av5/`](docs/av5) — Riscos e Qualidade (em andamento).
 
 ## Estrutura do projeto
 
-- [**``.github/workflows/``**](.github/workflows): Configurações do GitHub Workflows para automacao de CI/CD (Integração Contínua e Entrega Contínua).
-- [**``.vscode/``**](.vscode): Configurações do Visual Studio Code.
-- [**``src/``**](src/python_pdm_template/): Contém o código-fonte do projeto.
-- [**``tests/``**](tests): Contém os testes do projeto.
-- [**``pyproject.toml``**](pyproject.md): Arquivo de configuração do projeto, incluindo dependências e metadados.
+- [`.github/workflows/`](.github/workflows) — pipelines de CI, testes e release.
+- [`src/python_pdm_template/`](src/python_pdm_template) — codigo-fonte (Core, CLI e GUI).
+- [`tests/`](tests) — testes unitarios e de integracao.
+- [`pyproject.toml`](pyproject.toml) — dependencias, configuracao do pytest, Pyright e Ruff.
+- [`sonar-project.properties`](sonar-project.properties) — configuracao do SonarCloud.
 
-Cada pasta ou arquivo acima tem um ``README.md`` explicando sua finalidade, como funciona, e como usar cada uma delas. **Clique nos links acima e leia com atenção cada um dos READMEs para entender melhor o projeto.**
-- Em cada um dos links acima **há tarefas para você realizar**, para praticar o que foi explicado no README. 
-- As tarefas poderão ser **utilizadas para fins de avaliação na disciplina.** Assim, realize todas as tarefas propostas e envie suas respostas no nosso Google Classroom.
+Repositorio inicialmente baseado no template [andre-romano/python_pdm_template](https://github.com/andre-romano/python_pdm_template).

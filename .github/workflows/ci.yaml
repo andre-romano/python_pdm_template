@@ -52,3 +52,6 @@ jobs:
         shell: bash
 
       # TODO: Adicione aqui uma etapa para rodar o linter "ruff"
+# no arquivo ".github/workflows/ci.yml", adicione:
+      - name: Rodar ruff
+        run: python -m pdm run ruff check src/

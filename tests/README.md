@@ -7,25 +7,25 @@ Esta pasta contém os testes do projeto e está configurada para ser utilizada c
 1. Certifique-se de que o pytest está instalado no ambiente Python do projeto. Caso não esteja, instale-o com o seguinte comando:
 
    ```bash
-   pdm add -d pytest pytest-cov
+   python -m pdm add -d pytest pytest-cov
    ```
 
 2. Para executar todos os testes desta pasta, utilize o seguinte comando na raiz do projeto:
 
    ```bash
-   pdm run pytest
+   python -m pdm run pytest
    ```
 
 3. Para executar um teste específico, forneça o caminho do arquivo de teste ou da pasta. Por exemplo:
 
    ```bash
-   pdm run pytest tests/test_exemplo.py
+   python -m pdm run pytest tests/test_exemplo.py
    ```
 
 4. Utilize a opção `-v` para obter mais detalhes sobre os testes executados:
 
    ```bash
-   pdm run pytest -v
+   python -m pdm run pytest -v
    ```
 
 ## Cobertura de Código (Coverage)
@@ -40,7 +40,7 @@ O projeto está configurado para usar o [pytest-cov](https://pytest-cov.readthed
 
 ### Relatórios gerados
 
-Ao executar `pdm run pytest`, três tipos de relatórios são gerados automaticamente:
+Ao executar `python -m pdm run pytest`, três tipos de relatórios são gerados automaticamente:
 
 1. **Relatório no terminal**: Exibe a cobertura diretamente no console após a execução dos testes.
 
